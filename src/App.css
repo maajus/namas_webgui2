@@ -1,0 +1,33 @@
+
+
+.jumbotron{
+    margin:15px;
+    padding: 0.5rem 1rem !important;
+}
+
+.nopadding{
+    padding:0px !important;
+}
+
+.lightButton{
+    width:90px;
+    height:90px;
+    padding-top:10px !important;
+    padding-left:0px !important;
+    padding-right:0px !important;
+}
+
+.lightIcon{
+    font-size:280%;
+}
+
+.lightIcon.active {
+    color:#ffcd00;
+}
+
+.lightLabel{
+    font-size:60%;
+    color:wait;
+}
+
+.btn:focus{outline:none;}
