@@ -10,77 +10,95 @@ var ws_connected = false;
 
 
 
-function wsConnect(){
+export default class App extends React.Component {
 
-    console.log("WS connecting");
-    ws=new WebSocket("ws://"+window.location.hostname+":"+WS_PORT);
-
-    ws.binaryType = "arraybuffer";
-    ws.onmessage = messageReceived;
-    ws.onclose = connectionClosed;
-    ws.onopen = connectionOpened;
-
-}
-
-function connectionOpened(){
-    console.log("WS connection opened");
-    ws_connected = true;
-}
+    constructor(){
+        super();
+        this.state = {};
+    }
 
 
-function connectionClosed(){
-    console.log("WS connection closed");
-    clearInterval(statusTimer);
-    ws = null;
-    ws_connected = false;
-    setTimeout(function(){wsConnect()}, 5000);
-}
+    componentDidMount(){
+
+        this.wsConnect();
+        this.wsSend = this.wsSend.bind(this);
+        this.updateStatus();
+        setInterval(this.updateStatus, 2000);
+
+    }
+
+    updateStatus(){
+        if(ws != null && ws_connected)
+            ws.send(JSON.stringify({cmdID:1}));
+    }
 
 
+    wsConnect(){
+
+        console.log("WS connecting");
+        ws=new WebSocket("ws://"+window.location.hostname+":"+WS_PORT);
+
+        ws.binaryType = "arraybuffer";
+        ws.onmessage = this.messageReceived.bind(this);
+        ws.onclose = this.connectionClosed.bind(this);
+        ws.onopen = this.connectionOpened.bind(this);
+
+    }
+
+    connectionOpened(){
+        console.log("WS connection opened");
+        ws_connected = true;
+    }
 
 
-function messageReceived(evt){
+    connectionClosed(){
+        console.log("WS connection closed");
+        clearInterval(statusTimer);
+        ws = null;
+        ws_connected = false;
+        setTimeout(this.wsConnect, 5000);
+    }
+
+    buttonClicked(room_id,idx){
+        this.wsSend({cmdID:2, room_id:room_id, idx:idx});
+    }
 
 
-    if(evt.data.constructor === String){
+    messageReceived(evt){
 
-        let receivedData = JSON.parse(evt.data);
-        console.log(receivedData);
+        if(evt.data.constructor === String){
 
-        switch(receivedData.cmdID){
+            let receivedData = JSON.parse(evt.data);
+            console.log(receivedData);
+            this.setState({data:receivedData});
 
         }
 
     }
 
-}
+    renderRooms(){
 
-function wsSend(data){
+        if(this.state.data === undefined) return;
 
-    if(ws != null && ws_connected)
-        ws.send(JSON.stringify(data));
-}
+        var send = this.wsSend;
+        var click = this.buttonClicked;
+        var rooms = this.state.data.map(function(room){
+            return (<Kambarys key={room.room_id} data={room} wsSend={send} onClick={click}/>)
+        });
 
-
-export default class App extends React.Component {
-
-    componentDidMount(){
-
-        wsConnect();
-
+        return rooms;
     }
 
-    send(){
-        console.log("send");
-        wsSend({cmdID:1});
+    wsSend(data){
+        if(ws != null && ws_connected)
+            ws.send(JSON.stringify(data));
     }
 
     render(){
         return (
             <div>
-                <button onClick={this.send}> test </button>
-            <Kambarys wsSend={wsSend}/>
-</div>
+                {this.renderRooms()}
+            </div>
         );
     }
 }

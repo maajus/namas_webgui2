@@ -3,6 +3,7 @@
 .jumbotron{
     margin:15px;
     padding: 0.5rem 1rem !important;
+    margin-bottom:15px !important;
 }
 
 .nopadding{
@@ -28,6 +29,10 @@
 .lightLabel{
     font-size:60%;
     color:wait;
+}
+
+.roomLabel{
+    font-weight: bold;
 }
 
 .btn:focus{outline:none;}
